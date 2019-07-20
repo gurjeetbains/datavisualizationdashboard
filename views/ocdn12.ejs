@@ -1,0 +1,93 @@
+<% include partials/header %>
+<% include partials/navN12 %>
+<div class="" style="width:80%; height:80%; margin:0 auto;" >
+  <button type="button" class="btn btn-secondary btn-sm" id="deselect">Hide All</button>
+  <button type="button" class="btn btn-primary btn-sm" id="selectall">Show All</button>
+  <canvas id="myChart"></canvas>
+</div>
+<p>
+<button type="button" class="btn btn-primary"><a id="link1" onclick="done()" download="<%= title %>.png">Save as png</a></button>
+<button type="button" class="btn btn-primary"><a id="link2" onclick="done()" download="<%= title %>.jpg">Save as jpg</a></button>
+</p>
+<script type="text/javascript">
+var chartInstance;
+var ctx = document.getElementById('myChart').getContext('2d');
+var config= {
+  // The type of chart we want to create
+  type: 'line',
+  // The data for our dataset
+  data: {
+      labels: [
+        <% for(var i=0;i<(data.dates.length);i++){ %>
+          "<%= data.dates[i]%>",
+        <% } %>
+      ],
+      datasets: [
+        <% for (var j=0;j<data.locations.length;j++){ %>
+          <% var colours= colors();%>
+        {
+          label: "<%= data.locations[j] %>",
+          fill:false,
+          lineTension:0.1,
+          backgroundColor: '<%= colours %>',
+          borderColor: '<%= colours %>',
+          data: [<% for(var k=j*data.dates.length;k<=((j*data.dates.length)+data.dates.length);k++){ %>
+            <% if(data.elapsedTime[k]==-1){ %>
+              <%= %>
+              <%}else{%>
+                <%= data.elapsedTime[k] %>
+              <% } %>,
+          <% } %>],},
+      <% } %>]
+    },
+  //Configuration options go here
+  options: {
+				responsive: true,
+				title: {
+					display: true,
+					text: '<%= title %>'
+				},
+        legend:{
+          position: 'right'
+        },
+        scales: {
+    yAxes: [{
+      scaleLabel: {
+        display: true,
+        labelString: 'Seconds'
+      }
+    }]
+  }
+			},
+};
+window.onload = function() {
+  var ctx = document.getElementById('myChart').getContext('2d');
+  chartInstance = new Chart(ctx, config)
+  window.myLine = chartInstance;
+};
+$("#deselect").click(function() {
+   chartInstance.data.datasets.forEach(function(ds) {
+     if (ds._meta[0].hidden == false){
+       ds._meta[0].hidden=true
+     }else{
+      ds.hidden = true
+     }
+  });
+  chartInstance.update();
+});
+$("#selectall").click(function() {
+   chartInstance.data.datasets.forEach(function(ds) {
+     if (ds._meta[0].hidden){
+       ds._meta[0].hidden=false
+     }else{
+      ds.hidden = false
+     }
+  });
+  chartInstance.update();
+});
+$(function() {
+   var pgurl = window.location.pathname;
+   $("[href='"+ pgurl+"']").addClass('active');
+ });
+</script>
+<% include partials/footer %>
